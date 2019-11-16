@@ -1,4 +1,4 @@
-import math 
+import math, random 
 
 
 class StateNode:
@@ -16,7 +16,7 @@ def mcts(problem):
     # 
     strategy = {}
     # tree :: state : [sum of outcomes, # visits, explored actions, unexplored actions]
-    tree = TreeNode()
+    # tree = StateNode()
 
     savestate = problem.getState() 
     strategy[savestate] = 0
@@ -36,7 +36,11 @@ def selection(problem, strategy, tree):
 def expansion():
     return
 
-def simulation():
+def rollout(state, action):
+    if state.isTerminal():
+        return state.getValue()
+    Ai = random.choice(state.getActions())
+    # return rollout(new State, new Action)
     return
 
 def backprop():

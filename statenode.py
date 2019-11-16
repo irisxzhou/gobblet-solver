@@ -65,6 +65,10 @@ class StateNode:
         ''' Set the explored '''
         self.__explored = explored
 
+    def isTerminal(self):
+        # TODO: implement
+        pass
+
     def ucb1(self):
         currentMax = (-float('inf'), None)
         for child in self.__children:

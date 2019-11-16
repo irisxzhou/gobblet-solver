@@ -1,8 +1,10 @@
+import math 
+
+
 class StateNode:
     def __init__:
 
-
-
+        
 def mcts(problem):
     """
     Takes a 2-player game and uses Monte Carlo Tree Search to calculate and return
@@ -14,7 +16,7 @@ def mcts(problem):
     # 
     strategy = {}
     # tree :: state : [sum of outcomes, # visits, explored actions, unexplored actions]
-    tree = {}
+    tree = TreeNode()
 
     savestate = problem.getState() 
     strategy[savestate] = 0
@@ -25,10 +27,7 @@ def mcts(problem):
     problem.setState(savestate)
     return strategy
 
-def ucb1(tree, parent, child):
-    outcomes = tree
-    visits = tree[state[1]]
-    
+
 
 def selection(problem, strategy, tree):
     # tree

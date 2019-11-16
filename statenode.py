@@ -61,3 +61,14 @@ class StateNode:
     def setExplored(self, explored):
         ''' Set the explored '''
         self.__explored = explored
+
+
+
+
+    def ucb1(self, child):
+        currentMax = (value, child)
+        for child in tree.getChildren():
+            val = child.averageOutcomes() 2 * math.sqrt(
+                math.log(tree.getNumVisited) / child.getNumVisited)
+        # outcomes = tree
+        # visits = tree[state[1]]

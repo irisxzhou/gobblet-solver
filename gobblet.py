@@ -4,15 +4,19 @@ import argparse
 import time
 from expectiminimax import *
 
+"""
+Let White replace "X" as "W" and Black replace "O" as "B". 
+Save "state" of a tile as a list of pieces (B0, B1, B2, B3, and white ones).
+"Top" of the stack (visible on board to humans) would be LAST in the list
+White is max player, Black is min player
+"""
 class TicTacToe:
     '''Represents a game of Tic-Tac-Toe.'''
     
-    def __init__(self, randomO=False, randomX=False):
+    def __init__(self):
         '''Initializes the game with an empty board.'''
-        self.__board = [["."]*3, ["."]*3, ["."]*3]
+        self.__board = [["."]*4, ["."]*4, ["."]*4, ["."]*4]
         self.__turn = 1
-        self.__randomO = randomO
-        self.__randomX = randomX
         self.__numTurns = 0
         
     def getState(self):
@@ -24,35 +28,39 @@ class TicTacToe:
         '''Takes a state (as returned by getState) and sets the state of the game.'''
         rows = state.split("\n")[:-1]
         newBoard = [rows[i].split() for i in range(len(rows))]
-        if len(newBoard) != 3:
-            raise ValueError("Board is wrong size: " + str(len(newBoard)) + " rows, but expected 3")
-        numX = 0
-        numO = 0
-        for i in range(3):
-            if len(newBoard[i]) != 3:
-                raise ValueError("Board is wrong size: " + str(len(newBoard[i])) + " columns in row " + str(i) + ", but expected 3")
-            for j in range(3):
-                if newBoard[i][j] == "X":
-                    numX += 1
-                elif newBoard[i][j] == "O":
-                    numO += 1
+        if len(newBoard) != 4:
+            raise ValueError("Board is wrong size: " + str(len(newBoard)) + " rows, but expected 4")
+        numW = 0
+        numB = 0
+        for i in range(4):
+            if len(newBoard[i]) != 4:
+                raise ValueError("Board is wrong size: " + str(len(newBoard[i])) + " columns in row " + str(i) + ", but expected 4")
+            for j in range(4):
+                # last piece on the tile, first character W or B (not incl the number)
+                if newBoard[i][j][-1][0] == "W":
+                    numW += 1
+                # last piece on the tile, first character W or B (not incl the number)
+                elif newBoard[i][j][-1][0] == "B":
+                    numB += 1
                 elif newBoard[i][j] != ".":
                     raise ValueError("Unrecognized board symbol: " + newBoard[i][j] + " (must be ., X, or O)")
 
-        if numX == numO:            
+        if numW == numB:            
             self.__turn = 1
-        elif numX == numO + 1:
+        elif numW == numB + 1:
             self.__turn = -1
         else:
-            raise ValueError("Invalid board configuration. Number of Xs: " + str(numX) + ". Number of Os: " + str(numO))
+            raise ValueError("Invalid board configuration. Number of Xs: " + str(numW) + ". Number of Os: " + str(numB))
 
-        self.__numTurns = numX + numO
+        self.__numTurns = numW + numB
         self.__board = newBoard
         if self.isTerminal():
             self.__turn = 2
 
     def getSuccessors(self, state):
-        '''Takes a state and returns the possible successors as 4-tuples: (next state, action to get there, whoe turn in the next state, final score). For the last two items, see getTurn() and finalSCore().'''
+        '''Takes a state and returns the possible successors as 4-tuples: 
+        (next state, action to get there, whose turn in the next state, final score). 
+        For the last two items, see getTurn() and finalSCore().'''
         currentState = self.getState()
         succ = []
         self.setState(state)
@@ -65,14 +73,16 @@ class TicTacToe:
         return succ
 
     def legalMoves(self):
-        '''Returns the set of legal moves in the current state (a move is row, column tuple).'''
+        '''Returns the set of legal moves in the current state 
+        (a move is row, column tuple).'''
         if self.__turn == 2:
             return []
         else:
             return [(i,j) for i in range(3) for j in range(3) if self.__board[i][j] == "."]
     
     def move(self, action):
-        '''Takes an action (a row, column tuple) and, if it is legal, changes the state accordingly.'''
+        '''Takes an action (a row, column tuple) and, if it is legal, 
+        changes the state accordingly.'''
         if action not in [(i, j) for i in range(3) for j in range(3)]:
             raise ValueError("Unrecognized action: " + str(action))
         if self.__board[action[0]][action[1]] != ".":
@@ -91,7 +101,8 @@ class TicTacToe:
             self.__turn = 2
             
     def finalScore(self):
-        '''If the game is not over, returns None. If it is over, returns -1 if min won, +1 if max won, or 0 if it is a draw.'''                
+        '''If the game is not over, returns None. If it is over, returns -1 if min won, 
+        +1 if max won, or 0 if it is a draw.'''                
         xWins = ["X", "X", "X"]
         oWins = ["O", "O", "O"]
         for i in range(3):
@@ -118,17 +129,14 @@ class TicTacToe:
         return self.finalScore() != None
 
     def getTile(self, row, column):
-        '''Returns the contents of the board at the given position ("X" for max, "O" for min, and "." for empty).'''
+        '''Returns the contents of the board at the given position 
+        ("X" for max, "O" for min, and "." for empty).'''
         return self.__board[row][column]
 
     def getTurn(self):
-        '''Determines whose turn it is. Returns 1 for max, -1 for min, 0 for chance, or 2 if the state is terminal.'''
-        if self.__randomO and self.__turn == -1:
-            return 0
-        elif self.__randomX and self.__turn == 1:
-            return 0
-        else:
-            return self.__turn
+        '''Determines whose turn it is. Returns 1 for max, -1 for min, 
+        0 for chance, or 2 if the state is terminal.'''
+        return self.__turn
 
     def __str__(self):
         '''Returns a string representing the board (same as getState()).'''
@@ -209,11 +217,7 @@ def main():
     
     problem = TicTacToe()
     initState = problem.getState()
-    if args.playO:
-        randomProblem = TicTacToe(randomX=True)
-    else:
-        randomProblem = TicTacToe(randomO=True)        
-
+    
     if not args.everyturn:
         if args.strategy == "minimax" or args.opponent == "minimax":
             print("Pre-calculating minimax strategy...")

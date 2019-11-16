@@ -69,6 +69,10 @@ class StateNode:
         # TODO: implement
         pass
 
+    def terminalValue(self):
+        # TODO: implement
+        pass
+
     def ucb1(self):
         currentMax = (-float('inf'), None)
         for child in self.__children:

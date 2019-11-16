@@ -1,3 +1,6 @@
+import math
+
+
 class StateNode:
     def __init__(self, state, parent, children):
         ''' '''
@@ -62,13 +65,11 @@ class StateNode:
         ''' Set the explored '''
         self.__explored = explored
 
-
-
-
-    def ucb1(self, child):
-        currentMax = (value, child)
-        for child in tree.getChildren():
-            val = child.averageOutcomes() 2 * math.sqrt(
-                math.log(tree.getNumVisited) / child.getNumVisited)
+    def ucb1(self):
+        currentMax = (-float('inf'), None)
+        for child in self.__children:
+            val = child.averageOutcomes() + \
+                2 * math.sqrt(math.log(tree.getNumVisited) /
+                              child.getNumVisited)
         # outcomes = tree
         # visits = tree[state[1]]

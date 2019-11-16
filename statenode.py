@@ -9,9 +9,19 @@ class StateNode:
         self.__parent = parent
         self.__children = children
 
+        # for the sake of not iterating through all children every time 
+        self.__unexplored = children
+        self.__explored = []
+
         self.__sumOutcomes = 0
         self.__numVisited = 0
         self.__explored = 0
+
+    def exploreChildNode(self):
+        child = self.__unxplored.pop()
+        self.__explored.append(child)
+        child.setExplored(True)
+        return child
 
     def average_outcomes(self):
         ''' Average outcomes seen so far '''
@@ -49,6 +59,9 @@ class StateNode:
         ''' Set the sumOutcomes '''
         self.__sumOutcomes = sumOutcomes
 
+    def increaseSumOutcomes(self, value):
+        self.__sumOutcomes += value
+
     def getNumVisited(self):
         ''' Get the state node's numVisited '''
         return self.__numVisited
@@ -56,6 +69,10 @@ class StateNode:
     def setNumVisited(self, numVisited):
         ''' Set the numVisited '''
         self.__numVisited = numVisited
+
+    def incrementVisits(self):
+        ''' Increment number of visits by 1'''
+        self.__numVisited += 1
 
     def getExplored(self):
         ''' Get the state node's explored '''

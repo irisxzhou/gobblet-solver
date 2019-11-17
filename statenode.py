@@ -2,28 +2,48 @@ import math
 
 
 class StateNode:
-    def __init__(self, state, parent, children):
-        ''' '''
-        # tree :: state : [sum of outcomes, # visits, explored actions, unexplored actions]
+    def __init__(self, state, parent, problem):
+        ''' Initialize a new state-node '''
         self.__state = state
         self.__parent = parent
-        self.__children = children
-
-        # for the sake of not iterating through all children every time 
-        self.__unexplored = children
-        self.__explored = []
+        self.__problem = problem
 
         self.__sumOutcomes = 0
         self.__numVisited = 0
-        self.__explored = 0
+
+    def expand(self):
+        ''' Expand this node so that it is no longer a leaf node '''
+        # Compute the transition dictionary
+        self.__problem.setState(self.__state)
+        self.__transD = {move: self.getChild(
+            state, move) for move in self.__problem.legalMoves()}
+
+        # for the sake of not iterating through all children every time
+        self.__unexplored = list(transD.values())
+        self.__explored = []
+
+    def getChild(self, move):
+        ''' Get the child of the given state '''
+        self.__problem.setState(self.__state)
+        self.__problem.move(move)
+        return StateNode(self.__problem.getState(), self, self.__problem)
 
     def exploreChildNode(self):
-        child = self.__unxplored.pop()
-        self.__explored.append(child)
-        child.setExplored(True)
-        return child
+        ''' Returns a child node to explore, if there are still unexplored
+        nodes, otherwise returns None
+        '''
 
-    def average_outcomes(self):
+        # If there are still some nodes to explore, explore them
+        if self.__unexplored != []:
+            child = self.__unexplored.pop()
+            self.__explored.append(child)
+            child.expand()
+            return child
+
+        else:
+            return None
+
+    def averageOutcomes(self):
         ''' Average outcomes seen so far '''
         return self.__sumOutcomes / self.__numVisited
 
@@ -31,70 +51,59 @@ class StateNode:
         ''' Get the state node's state '''
         return self.__state
 
-    def setState(self, state):
-        ''' Set the state '''
-        self.__state = state
-
     def getParent(self):
         ''' Get the state node's parent '''
         return self.__parent
 
-    def setParent(self, parent):
-        ''' Set the parent '''
-        self.__parent = parent
-
     def getChildren(self):
         ''' Get the state node's children '''
-        return self.__children
-
-    def setChildren(self, children):
-        ''' Set the children '''
-        self.__children = children
+        return self.__transD.values()
 
     def getSumOutcomes(self):
         ''' Get the state node's sumOutcomes '''
         return self.__sumOutcomes
 
-    def setSumOutcomes(self, sumOutcomes):
+    def addOutcome(self, outcome):
         ''' Set the sumOutcomes '''
-        self.__sumOutcomes = sumOutcomes
-
-    def increaseSumOutcomes(self, value):
-        self.__sumOutcomes += value
+        self.__sumOutcomes += outcome
+        self.__numVisited += 1
 
     def getNumVisited(self):
         ''' Get the state node's numVisited '''
         return self.__numVisited
 
-    def setNumVisited(self, numVisited):
-        ''' Set the numVisited '''
-        self.__numVisited = numVisited
-
-    def incrementVisits(self):
-        ''' Increment number of visits by 1'''
-        self.__numVisited += 1
-
     def getExplored(self):
         ''' Get the state node's explored '''
         return self.__explored
 
-    def setExplored(self, explored):
-        ''' Set the explored '''
-        self.__explored = explored
-
     def isTerminal(self):
-        # TODO: implement
-        pass
+        ''' Return true if this is a terminal node '''
+
+        # Ask the problem whether or not it is terminal
+        self.__problem.setState(self.__state)
+        isT = self.__problem.isTerminal()
+
+        return isT
 
     def terminalValue(self):
-        # TODO: implement
-        pass
+        ''' Get the outcome of the terminal node '''
 
-    def ucb1(self):
-        currentMax = (-float('inf'), None)
-        for child in self.__children:
+        # Get the value from the problem
+        self.__problem.setState(self.__state)
+        value = self.__problem.finalScore()
+
+        return value
+
+    def UCB1(self):
+        curMax = (-float('inf'), None)
+
+        # For each of our explored children
+        for child in self.__explored:
             val = child.averageOutcomes() + \
-                2 * math.sqrt(math.log(tree.getNumVisited) /
-                              child.getNumVisited)
-        # outcomes = tree
-        # visits = tree[state[1]]
+                2 * math.sqrt(math.log(self.getNumVisited()) /
+                              child.getNumVisited())
+
+            if val > curMax[0]:
+                curMax = (val, child)
+
+        return curMax[1]

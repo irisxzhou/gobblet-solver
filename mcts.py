@@ -22,7 +22,7 @@ def mcts(problem):
     tree.expand()
     strategy[savestate] = 0
 
-    iters = 1000
+    iters = 10000
     for i in range(iters):
         leaf = expand(tree)
         score = rollout(problem, leaf.getState())

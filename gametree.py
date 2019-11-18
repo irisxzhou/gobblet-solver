@@ -287,8 +287,6 @@ def main():
 
     problem = BinaryGameTree(turns, payoffs)
 
-    print("Calculating strategy...\n")
-
     strategy = {}
     strategy[problem.getState()] = mcts(problem)
 

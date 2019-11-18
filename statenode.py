@@ -2,12 +2,13 @@ import math
 
 
 class StateNode:
-    def __init__(self, state, parent, problem):
+    def __init__(self, problem, parent):
         ''' Initialize a new state-node '''
-        self.__state = state
         self.__parent = parent
         self.__problem = problem
 
+        self.__state = problem.getState()
+        self.__turn = problem.getTurn()
         self.__sumOutcomes = 0
         self.__numVisited = 0
 
@@ -26,7 +27,7 @@ class StateNode:
         ''' Get the child of the given state '''
         self.__problem.setState(self.__state)
         self.__problem.move(move)
-        return StateNode(self.__problem.getState(), self, self.__problem)
+        return StateNode(self.__problem, self)
 
     def exploreChildNode(self):
         ''' Returns a child node to explore, if there are still unexplored
@@ -94,18 +95,26 @@ class StateNode:
         return value
 
     def UCB1(self):
-        curMax = (-float('inf'), None)
+        if self.__turn == 1:
+            curExtema = (-float('inf'), None)
+        elif self.__turn == -1:
+            curExtema = (float('inf'), None)
+        else:
+            raise ValueError
 
         # For each of our explored children
         for child in self.__explored:
-            val = child.averageOutcomes() + \
+            val = child.averageOutcomes() + self.__turn * \
                 2 * math.sqrt(math.log(self.getNumVisited()) /
                               child.getNumVisited())
 
-            if val > curMax[0]:
-                curMax = (val, child)
+            if self.__turn == 1 and val > curExtema[0]:
+                curExtema = (val, child)
 
-        return curMax[1]
+            if self.__turn == -1 and val < curExtema[0]:
+                curExtema = (val, child)
+
+        return curExtema[1]
 
     def nextMove(self):
         child = self.UCB1()

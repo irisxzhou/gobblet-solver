@@ -18,7 +18,7 @@ def mcts(problem):
     savestate = problem.getState()
 
     strategy = {}
-    tree = StateNode(problem.getState(), None, problem)
+    tree = StateNode(problem, None)
     tree.expand()
     strategy[savestate] = 0
 

@@ -1,3 +1,5 @@
+''' Source: CS 151 Project 2 Starter Code '''
+
 import random
 import argparse
 import time

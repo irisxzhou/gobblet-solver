@@ -15,11 +15,11 @@ class StateNode:
         ''' Expand this node so that it is no longer a leaf node '''
         # Compute the transition dictionary
         self.__problem.setState(self.__state)
-        self.__transD = {move: self.getChild(
-            state, move) for move in self.__problem.legalMoves()}
+        self.__transD = {self.getChild(move): move
+                         for move in self.__problem.legalMoves()}
 
         # for the sake of not iterating through all children every time
-        self.__unexplored = list(transD.values())
+        self.__unexplored = list(self.__transD.keys())
         self.__explored = []
 
     def getChild(self, move):
@@ -39,7 +39,6 @@ class StateNode:
             self.__explored.append(child)
             child.expand()
             return child
-
         else:
             return None
 
@@ -107,3 +106,7 @@ class StateNode:
                 curMax = (val, child)
 
         return curMax[1]
+
+    def nextMove(self):
+        child = self.UCB1()
+        return (self.__transD[child], child.averageOutcomes())

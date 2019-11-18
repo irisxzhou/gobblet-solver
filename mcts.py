@@ -1,36 +1,45 @@
 import random
 
+from statenode import StateNode
+
 
 def mcts(problem):
     """
     Takes a 2-player game and uses Monte Carlo Tree Search to calculate and return
     a strategy for the game.
 
-    Adapted from https://www.analyticsvidhya.com/blog/2019/01/monte-carlo-tree-search-introduction-algorithm-deepmind-alphago/
+    Adapted from
+    https://www.analyticsvidhya.com/blog/2019/01/monte-carlo-tree-search-introduction-algorithm-deepmind-alphago/
     """
+
+    if problem.isTerminal():
+        return (0, problem.finalScore())
 
     savestate = problem.getState()
 
     strategy = {}
     tree = StateNode(problem.getState(), None, problem)
+    tree.expand()
     strategy[savestate] = 0
 
-    # do stuff here
+    iters = 1000
+    for i in range(iters):
+        leaf = expand(tree)
+        score = rollout(problem, leaf.getState())
+        backprop(leaf, score)
 
     problem.setState(savestate)
-    return strategy
+    return tree.nextMove()
 
-
-# not sure if this is necessary
-# def selection(problem, strategy, tree):
-#     # tree
-#     return
 
 def expand(node):
     """
     Expand unexplored child node. Fails if node has no more unexplored
     children.
     """
+    if node.isTerminal():
+        return node
+
     # Get the next unexplored state
     nextState = node.exploreChildNode()
 

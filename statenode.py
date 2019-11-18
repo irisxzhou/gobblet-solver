@@ -96,9 +96,9 @@ class StateNode:
 
     def UCB1(self):
         if self.__turn == 1:
-            curExtema = (-float('inf'), None)
+            curExtrema = (-float('inf'), None)
         elif self.__turn == -1:
-            curExtema = (float('inf'), None)
+            curExtrema = (float('inf'), None)
         else:
             raise ValueError
 
@@ -108,13 +108,13 @@ class StateNode:
                 2 * math.sqrt(math.log(self.getNumVisited()) /
                               child.getNumVisited())
 
-            if self.__turn == 1 and val > curExtema[0]:
-                curExtema = (val, child)
+            if self.__turn == 1 and val > curExtrema[0]:
+                curExtrema = (val, child)
 
-            if self.__turn == -1 and val < curExtema[0]:
-                curExtema = (val, child)
+            if self.__turn == -1 and val < curExtrema[0]:
+                curExtrema = (val, child)
 
-        return curExtema[1]
+        return curExtrema[1]
 
     def nextMove(self):
         child = self.UCB1()

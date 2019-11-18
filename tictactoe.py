@@ -5,7 +5,7 @@ import random
 import argparse
 import time
 from expectiminimax import *
-
+from mcts import * 
 
 class TicTacToe:
     '''Represents a game of Tic-Tac-Toe.'''
@@ -211,9 +211,9 @@ class TicTacToeDisplay:
 def main():
     parser = argparse.ArgumentParser(description='Solve and play tic-tac-toe.')
     parser.add_argument('-o', '--opponent', type=str, default='minimax', choices=[
-                        'minimax', 'random', 'human'], help='sets the type of the opponent player (default: minimax)')
+                        'minimax', 'random', 'human', 'mcts'], help='sets the type of the opponent player (default: minimax)')
     parser.add_argument('-s', '--strategy', type=str, default='minimax', choices=[
-                        'minimax', 'expectimax'], help='sets the algorithm to generate the strategy of the agent (default: minimax)')
+                        'minimax', 'expectimax', 'mcts'], help='sets the algorithm to generate the strategy of the agent (default: minimax)')
     parser.add_argument('-p', '--prune', action='store_true', default=False,
                         help='use alpha-beta pruning in minimax search (has no effect on expectimax)')
     parser.add_argument('-t', '--trials', type=int, default=1,
@@ -223,7 +223,7 @@ def main():
     parser.add_argument('-nd', '--nodisplay', action='store_true', default=False,
                         help='do not display the game (has no effect if opponent is human)')
     parser.add_argument('-e', '--everyturn', action='store_true', default=False,
-                        help='perform the search at every turn, rather than just from the root')
+                        help='perform the search at every turn, rather than just from the root, has no effect on mcts')
 
     args = parser.parse_args()
 
@@ -278,10 +278,13 @@ def main():
                         strategy = minimax(problem, args.prune)
                     if args.strategy == "expectimax":
                         strategy = expectiminimax(randomProblem)
-
-                move = strategy[problem.getState()][0]
+                if args.strategy == "mcts":
+                    move = mcts(problem)[0]
+                else:
+                    move = strategy[problem.getState()][0]
                 endT = time.time()
                 totalTurnTime += endT-startT
+            # otherwise, it is the opponent's turn
             elif args.opponent == "minimax":
                 if args.everyturn:
                     minimaxStrategy = minimax(problem, args.prune)
@@ -289,9 +292,10 @@ def main():
                 move = minimaxStrategy[problem.getState()][0]
             elif args.opponent == "random":
                 move = random.choice(problem.legalMoves())
+            elif args.opponent == "mcts":
+                move = mcts(problem)[0]
             else:  # human player
                 move = display.getMove()
-
             problem.move(move)
             avgGameLength += 1
             gameLength += 1

@@ -57,6 +57,7 @@ class TicTacToe:
         if self.isTerminal():
             self.__turn = 2
 
+    # completed up to here
     def getSuccessors(self, state):
         '''Takes a state and returns the possible successors as 4-tuples: 
         (next state, action to get there, whose turn in the next state, final score). 

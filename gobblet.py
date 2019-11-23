@@ -57,7 +57,6 @@ class TicTacToe:
         if self.isTerminal():
             self.__turn = 2
 
-    # completed up to here
     def getSuccessors(self, state):
         '''Takes a state and returns the possible successors as 4-tuples: 
         (next state, action to get there, whose turn in the next state, final score). 
@@ -73,30 +72,33 @@ class TicTacToe:
         random.shuffle(succ)
         return succ
 
+    # still need to include size of piece -- make each action a tuple ie. ((x,y), "W0")
+    # also put in the if statement for if turn==2 bc that's terminal
     def legalMoves(self):
         '''Returns the set of legal moves in the current state 
         (a move is row, column tuple).'''
-        if self.__turn == 2:
-            return []
-        else:
-            return [(i,j) for i in range(3) for j in range(3) if self.__board[i][j] == "."]
+        return [(i,j)  for i in range(4) for j in range(4) if self.__board[i][j] == "."]
     
+    # completed up to here
     def move(self, action):
-        '''Takes an action (a row, column tuple) and, if it is legal, 
+        '''Takes an action ie. ((x,y), "W0") and, if it is legal, 
         changes the state accordingly.'''
-        if action not in [(i, j) for i in range(3) for j in range(3)]:
+        if action[0] not in [(i, j) for i in range(4) for j in range(4)]:
             raise ValueError("Unrecognized action: " + str(action))
         if self.__board[action[0]][action[1]] != ".":
-            raise ValueError("Illegal move: position " + str(action) + " is already occupied (" + self__board[action[0]][action[1]] + ")")
+            # this if takes the 'list of pieces' on a tile and compares against piece's number
+            if self.__board[action[0]][action[1]][-1][1]>= action[1][1]:
+                raise ValueError("Illegal move: piece " + str(action) + " not larger than top piece")
         
-        if self.__turn == 2:
-            raise ValueError("Illegal move: game is terminated.")
-        elif self.__turn == 1:
-            self.__board[action[0]][action[1]] = "X"
+        # This stuff should be done already, but relies on action being ie. ((x,y), "W0")
+        if self.__turn == 1 and action[1][0]=="W":
+            self.__board[action[0][0]][action[0][1]] = self.__board[action[0][0]][action[0][1]] + [action[1]]
             self.__turn = -1
-        elif self.__turn == -1:
-            self.__board[action[0]][action[1]] = "O"
+        elif self.__turn == -1 and action[1][0]=="B":
+            self.__board[action[0][0]][action[0][1]] = self.__board[action[0][0]][action[0][1]] + [action[1]]
             self.__turn = 1
+        else:
+            raise ValueError("Illegal move: game is terminated.")
 
         if self.isTerminal():
             self.__turn = 2

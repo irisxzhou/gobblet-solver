@@ -10,7 +10,7 @@ Save "state" of a tile as a list of pieces (B0, B1, B2, B3, and white ones).
 "Top" of the stack (visible on board to humans) would be LAST in the list
 White is max player, Black is min player
 """
-class TicTacToe:
+class Gobblet:
     '''Represents a game of Tic-Tac-Toe.'''
     
     def __init__(self):
@@ -72,14 +72,19 @@ class TicTacToe:
         random.shuffle(succ)
         return succ
 
-    # still need to include size of piece -- make each action a tuple ie. ((x,y), "W0")
-    # also put in the if statement for if turn==2 bc that's terminal
     def legalMoves(self):
         '''Returns the set of legal moves in the current state 
-        (a move is row, column tuple).'''
-        return [(i,j)  for i in range(4) for j in range(4) if self.__board[i][j] == "."]
+        (a move is ie. ((x,y), "W0")).'''
+        if self.__turn==2:
+            return []
+        else:
+            # pieces = ["W"+size for str(size) in range(4)]
+            pieces = ["W0", "W1", "W2", "W3", "B0", "B1", "B2", "B3"]
+            movesCoords = [(i,j)  for i in range(4) for j in range(4)]
+            moves = [(x, k) for x in movesCoords for k in pieces if self.__board[x[0]][x[1]][-1][1]>= k[1]]
+            print(moves)
+            return moves
     
-    # completed up to here
     def move(self, action):
         '''Takes an action ie. ((x,y), "W0") and, if it is legal, 
         changes the state accordingly.'''
@@ -106,20 +111,20 @@ class TicTacToe:
     def finalScore(self):
         '''If the game is not over, returns None. If it is over, returns -1 if min won, 
         +1 if max won, or 0 if it is a draw.'''                
-        xWins = ["X", "X", "X"]
-        oWins = ["O", "O", "O"]
-        for i in range(3):
-            row = [self.__board[i][j] for j in range(3)]
-            col = [self.__board[j][i] for j in range(3)]
-            if row == xWins or col == xWins:
+        wWins = ["W", "W", "W", "W"]
+        bWins = ["B", "B", "B", "B"]
+        for i in range(4):
+            row = [self.__board[i][j][-1][0] for j in range(4)]
+            col = [self.__board[j][i][-1][0] for j in range(4)]
+            if row == wWins or col == wWins:
                 return 1
-            elif row == oWins or col == oWins:
+            elif row == bWins or col == bWins:
                 return -1
-        diag = [self.__board[i][i] for i in range(3)]
-        antidiag = [self.__board[i][2-i] for i in range(3)]
-        if diag == xWins or antidiag == xWins:
+        diag = [self.__board[i][i][-1][0] for i in range(3)]
+        antidiag = [self.__board[i][2-i][-1][0] for i in range(3)]
+        if diag == xWinswWins or antidiag == wWins:
             return 1
-        elif diag == oWins or antidiag == oWins:
+        elif diag == bWins or antidiag == bWins:
             return -1
 
         for i in range(3):
@@ -145,6 +150,7 @@ class TicTacToe:
         '''Returns a string representing the board (same as getState()).'''
         return self.getState()
 
+# completed up to here
 class TicTacToeDisplay:
     '''Displays a Tic-Tac-Toe game.'''
     def __init__(self, problem):

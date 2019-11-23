@@ -83,8 +83,7 @@ class TicTacToe:
     def move(self, action):
         '''Takes an action ie. ((x,y), "W0") and, if it is legal, 
         changes the state accordingly.'''
-        # TODO: need to edit so action is a tuple of coords and piece ie. ((x,y), "W0")
-        if action not in [(i, j) for i in range(4) for j in range(4)]:
+        if action[0] not in [(i, j) for i in range(4) for j in range(4)]:
             raise ValueError("Unrecognized action: " + str(action))
         if self.__board[action[0]][action[1]] != ".":
             # this if takes the 'list of pieces' on a tile and compares against piece's number

@@ -213,7 +213,7 @@ def main():
     parser.add_argument('-o', '--opponent', type=str, default='minimax', choices=[
                         'minimax', 'random', 'human', 'mcts'], help='sets the type of the opponent player (default: minimax)')
     parser.add_argument('-s', '--strategy', type=str, default='minimax', choices=[
-                        'minimax', 'expectimax', 'mcts'], help='sets the algorithm to generate the strategy of the agent (default: minimax)')
+                        'minimax', 'random', 'expectimax', 'mcts'], help='sets the algorithm to generate the strategy of the agent (default: minimax)')
     parser.add_argument('-p', '--prune', action='store_true', default=False,
                         help='use alpha-beta pruning in minimax search (has no effect on expectimax)')
     parser.add_argument('-t', '--trials', type=int, default=1,
@@ -280,7 +280,9 @@ def main():
                         strategy = expectiminimax(randomProblem)
                 if args.strategy == "mcts":
                     move = mcts(problem)[0]
-                else:
+                elif args.strategy == "random":
+                    move = random.choice(problem.legalMoves())
+                else: # minimax/expectimax
                     move = strategy[problem.getState()][0]
                 endT = time.time()
                 totalTurnTime += endT-startT
@@ -326,6 +328,8 @@ def main():
         print("Draws:  " + str(numDraws))
         print("Losses: " + str(args.trials - numWins - numDraws))
         print("Avg. Length: " + str(avgGameLength/args.trials) + " turns")
+        print("Average time in agent turns (ignoring opponent turns): " + str(totalTurnTime / args.trials))
+
 
     if args.trials == 1 and not args.nodisplay:
         print("Click on the window to exit")

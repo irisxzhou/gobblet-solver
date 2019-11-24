@@ -24,7 +24,9 @@ class TicTacToe:
                 "\n" for i in range(len(self.__board))]
         return "".join(rows)
 
-    def setState(self, state):
+    def setState(self, state            whoWon = "X wins!"
+            if not args.playO:
+):
         '''Takes a state (as returned by getState) and sets the state of the game.'''
         rows = state.split("\n")[:-1]
         newBoard = [rows[i].split() for i in range(len(rows))]
@@ -266,10 +268,10 @@ def main():
     numWins = 0
     numDraws = 0
     avgGameLength = 0
+    totalTurnTime = 0
     for t in range(args.trials):
         gameLength = 0
         problem.setState(initState)
-        totalTurnTime = 0
         while not problem.isTerminal():
             if problem.getTurn() == agentTurn:
                 startT = time.time()

@@ -24,9 +24,7 @@ class TicTacToe:
                 "\n" for i in range(len(self.__board))]
         return "".join(rows)
 
-    def setState(self, state            whoWon = "X wins!"
-            if not args.playO:
-):
+    def setState(self, state):
         '''Takes a state (as returned by getState) and sets the state of the game.'''
         rows = state.split("\n")[:-1]
         newBoard = [rows[i].split() for i in range(len(rows))]

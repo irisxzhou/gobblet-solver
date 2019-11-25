@@ -266,10 +266,10 @@ def main():
     numWins = 0
     numDraws = 0
     avgGameLength = 0
+    totalTurnTime = 0
     for t in range(args.trials):
         gameLength = 0
         problem.setState(initState)
-        totalTurnTime = 0
         while not problem.isTerminal():
             if problem.getTurn() == agentTurn:
                 startT = time.time()

@@ -1,5 +1,7 @@
 import math
 
+nodes = {}
+
 
 class StateNode:
     def __init__(self, problem, parent):
@@ -18,6 +20,10 @@ class StateNode:
         self.__problem.setState(self.__state)
         self.__transD = {self.getChild(move): move
                          for move in self.__problem.legalMoves()}
+
+        # Add to the global list of nodes
+        for node in self.__transD:
+            nodes[node.getState()] = node
 
         # for the sake of not iterating through all children every time
         self.__unexplored = list(self.__transD.keys())

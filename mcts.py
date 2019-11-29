@@ -1,6 +1,6 @@
 import random
 
-from statenode import StateNode
+from statenode import StateNode, nodes
 
 
 def mcts(problem):
@@ -12,17 +12,22 @@ def mcts(problem):
     https://www.analyticsvidhya.com/blog/2019/01/monte-carlo-tree-search-introduction-algorithm-deepmind-alphago/
     """
 
+    # Settings
+    iters = 1000
+    useSaved = True
+
     if problem.isTerminal():
         return (0, problem.finalScore())
 
     savestate = problem.getState()
 
-    strategy = {}
-    tree = StateNode(problem, None)
-    tree.expand()
-    strategy[savestate] = 0
+    if useSaved and problem.getState() in nodes:
+        tree = nodes[problem.getState()]
+    else:
+        tree = StateNode(problem, None)
 
-    iters = 10000
+    tree.expand()
+
     for i in range(iters):
         leaf = expand(tree)
         score = rollout(problem, leaf.getState())

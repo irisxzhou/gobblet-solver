@@ -6,39 +6,36 @@ import ast
 
 from mcts import *
 
-"""
-Let White replace "X" as "W" and Black replace "O" as "B".
-Save "state" of a tile as just the last piece on top (B0, B1, B2, B3, and white ones).
-"Top" of the stack (visible on board to humans)
-White is max player, Black is min player - White goes first.
-"""
-
 
 class Gobblet:
     '''Represents a game of Gobblet.'''
 
     def __init__(self):
         '''Initializes the game with an empty board.'''
-        self.__board = [[["." for k in range(4)]
-                         for j in range(4)] for i in range(4)]
-        self.__turn = 1
-        self.__numTurns = 0
+        self.__empty = "."
         self.__rows = 4
         self.__cols = 4
         self.__num_pieces = 4
+        self.__board = [[[self.__empty for k in range(self.__num_pieces)]
+                         for j in range(self.__cols)]
+                        for i in range(self.__rows)]
+
+        self.__turn = 1
+        self.__numTurns = 0
         self.__num_each = 3
 
         # self.__pieces[0] -> pieces left for min player (index = piece size)
         # self.__pieces[1] -> pieces left for max player
-        self.__pieces = [[self.__num_each for j in range(
-            self.__num_pieces)] for i in range(2)]
+        self.__pieces = [[self.__num_each for j in range(self.__num_pieces)]
+                         for i in range(2)]
 
     def getState(self):
         '''Returns the state of the game (as a string).'''
         return str(self.__board)
 
     def setState(self, state):
-        '''Takes a state (as returned by getState) and sets the state of the game.'''
+        '''Takes a state (as returned by getState) and sets the state of
+        the game. '''
         # Compute the new board
         newBoard = ast.literal_eval(state)
         newPieces = [[self.__num_each for j in range(
@@ -47,25 +44,27 @@ class Gobblet:
         # Check that we have an appropriately sized board
         if len(newBoard) != self.__rows:
             raise ValueError("Board is wrong size: " +
-                             str(len(newBoard)) + " rows, but expected 4")
+                             str(len(newBoard)) + " rows, but expected " +
+                             str(self.__rows))
         numW = 0
         numB = 0
 
         # Go through all slots
         for i in range(self.__rows):
             if len(newBoard[i]) != self.__cols:
-                raise ValueError("Board is wrong size: " + str(
-                    len(newBoard[i])) + " columns in row " + str(i) + ", but expected 4")
+                raise ValueError("Board is wrong size: " +
+                                 str(len(newBoard[i])) + " columns in row " +
+                                 str(i) + ", but expected " + str(self.__cols))
             for j in range(self.__cols):
                 if len(newBoard[i][j]) != self.__num_pieces:
                     raise ValueError("Board is wrong size: " + str(
                         len(newBoard[i][j])) + " spots for pieces" +
                         " in location (" + str(i) + ", " + str(j) +
-                        ") but expected 4")
+                        ") but expected " + str(self.__num_pieces))
 
                 for k in range(self.__num_pieces):
                     # If this is blank, nothing to do
-                    if newBoard[i][j][k] == ".":
+                    if newBoard[i][j][k] == self.__empty:
                         continue
 
                     # Extract player and piece
@@ -115,11 +114,11 @@ class Gobblet:
         ''' Get the size of the largest piece in this location.
         Returns -1 if there are no pieces yet'''
         max_ = -1
-        piece = "."
+        piece = self.__empty
         i, j = coors
 
         for k in range(self.__num_pieces):
-            if self.__board[i][j][k] == ".":
+            if self.__board[i][j][k] == self.__empty:
                 continue
 
             if max_ < int(self.__board[i][j][k][1]):
@@ -132,20 +131,16 @@ class Gobblet:
         '''Returns the set of legal moves in the current state
         (a move is ie. ((x,y), "W0")).'''
 
-        # Store the color
+        # If the game is over, there are not legal moves
         if self.__turn == 2:
             return []
-        elif self.__turn == -1:
-            color = "B"
-            pieces = self.__pieces[0]
-        else:
-            color = "W"
-            pieces = self.__pieces[1]
 
         # Compute all legal moves
-        movesCoords = [(i, j) for i in range(4) for j in range(4)]
-        moves = [(x, color + str(k)) for x in movesCoords for k in range(4)
-                 if (self.largestPiece(x)[0] < k and pieces[k] > 0)]
+        movesCoords = [(i, j) for i in range(self.__rows)
+                       for j in range(self.__cols)]
+        moves = [(x, self.getColor() + str(k))
+                 for x in movesCoords for k in range(self.__num_pieces)
+                 if (self.largestPiece(x)[0] < k and self.getPieces()[k] > 0)]
 
         return moves
 
@@ -153,7 +148,7 @@ class Gobblet:
         ''' Insert a piece into the given location '''
         (i, j), piece = move
         for k in range(self.__num_pieces):
-            if self.__board[i][j][k] == ".":
+            if self.__board[i][j][k] == self.__empty:
                 self.__board[i][j][k] = piece
                 return
 
@@ -163,37 +158,47 @@ class Gobblet:
     def move(self, action):
         '''Takes an action ie. ((x,y), "W0") and, if it is legal,
         changes the state accordingly.'''
-        if action[0] not in [(i, j) for i in range(4) for j in range(4)]:
-            raise ValueError("Unrecognized action: " + str(action))
-        if self.__board[action[0][0]][action[0][1]] != ".":
-            # this if takes the 'list of pieces' on a tile and compares against piece's number
+
+        # Make sure that the location is on the board
+        if action[0] not in [(i, j) for i in range(self.__rows)
+                             for j in range(self.__cols)]:
+            raise ValueError("Move not on board: " + str(action))
+
+        # Make sure that the given move can cover a piece that is already there
+        if self.__board[action[0][0]][action[0][1]] != self.__empty:
             if self.largestPiece(action[0])[0] >= int(action[1][1]):
                 raise ValueError("Illegal move: piece " +
                                  str(action[1]) + " not larger than top piece")
 
-        if self.__turn == 1 and action[1][0] == "W":
-            self.insertPiece(action)
-            self.__pieces[1][int(action[1][1])] -= 1
-            self.__turn = -1
-        elif self.__turn == -1 and action[1][0] == "B":
-            self.insertPiece(action)
-            self.__pieces[0][int(action[1][1])] -= 1
-            self.__turn = 1
-        else:
-            raise ValueError("Illegal move: game is terminated.")
+        # Make sure that the given piece exists
+        if int(action[1][1]) > self.__num_pieces:
+            raise ValueError("Illegal piece: " + action[1])
+
+        # Make sure that the user can add more of the given piece
+        if self.getPieces()[int(action[1][1])] <= 0:
+            raise ValueError("Illegal piece: no more " + action[1] +
+                             "s to place")
+
+        # Make sure that the correct color piece is being placed
+        if self.getColor() != action[1][0]:
+            raise ValueError("Illegal color: game is terminated.")
+
+        self.insertPiece(action)
+        self.getPieces()[int(action[1][1])] -= 1
+        self.__turn *= -1
 
         if self.isTerminal():
             self.__turn = 2
 
     def finalScore(self):
-        '''If the game is not over, returns None. If it is over, returns -1 if min won,
-        +1 if max won, or 0 if it is a draw.'''
+        '''If the game is not over, returns None. If it is over, returns -1 if
+        min won, +1 if max won, or 0 if it is a draw.'''
 
-        wWins = ["W", "W", "W", "W"]
-        bWins = ["B", "B", "B", "B"]
-        for i in range(4):
-            row = [self.largestPiece((i, j))[1][0] for j in range(4)]
-            col = [self.largestPiece((j, i))[1][0] for j in range(4)]
+        wWins = ["W"] * self.__rows
+        bWins = ["B"] * self.__rows
+        for i in range(self.__rows):
+            row = [self.largestPiece((i, j))[1][0] for j in range(self.__rows)]
+            col = [self.largestPiece((j, i))[1][0] for j in range(self.__cols)]
             if row == wWins or col == wWins:
                 return 1
             elif row == bWins or col == bWins:
@@ -230,7 +235,7 @@ class Gobblet:
         for i in range(self.__rows):
             for j in range(self.__cols):
                 piece = self.largestPiece((i, j))[1]
-                if piece == ".":
+                if piece == self.__empty:
                     piece += " "
 
                 string += piece + " "
@@ -238,48 +243,66 @@ class Gobblet:
 
         return string[:-1]
 
-# completed up to here: NEED TO MAKE GOBBLET DISPLAY constructor
+    def getPieces(self):
+        ''' Returns the array of pieces not yet placed on the board '''
+        if self.__turn == -1:
+            return self.__pieces[0]
+        elif self.__turn == 1:
+            return self.__pieces[1]
+        else:
+            raise ValueError("Game finished")
+
+    def getColor(self):
+        ''' If the turn is 1, the color is W, if the turn is -1 the color is B
+        '''
+        if self.__turn == -1:
+            return "B"
+        elif self.__turn == 1:
+            return "W"
+        else:
+            raise ValueError("Game finished")
 
 
-class GobbletDisplay:
-    '''Displays a Gobblet game.'''
+def humanTurn(problem, oppType):
+    print("Now it is your turn. Currently the board looks like this:")
+    print(problem)
 
-    def __init__(self, problem):
-        '''Takes a Gobblet and initializes the display.'''
-        self.__problem = problem
+    print("You have not placed the following pieces:")
+    for i, num in enumerate(problem.getPieces()):
+        print("Size " + str(i) + ": " + str(num), end="; ")
+    print()
 
-        self.__numCols = 4
-        self.__numRows = 4
+    row = int(input("Please enter row (integer 0 through 3) you want to " +
+                    "move piece to: "))
+    col = int(input("Please enter col (integer 0 through 3) you want to " +
+                    "move piece to: "))
+    piece = input("Please enter the size of the piece you want to put down " +
+                  "(integer 0 through 3): ")
 
-    # TODO: FIX
-    def update(self):
-        '''Updates the game display based on the game's current state.'''
-        self.__problem.getState()
+    if oppType != "human":
+        print("Calculating " + oppType + " move...")
 
-    def getMove(self):
-        '''Allows the user to click to decide which square to move in.'''
-        row = int(
-            input("Please enter row (integer 0 through 3) you want to move piece to: "))
-        col = int(
-            input("Please enter col (integer 0 through 3) you want to move piece to: "))
-        piece = input("Enter piece you want to put down \
-            (aka 'B0', 'W1' etc - B or W for black/white and int between 0 and 3 for size, 0 smallest): ")
-        return ((row, col), piece)
+    return ((row, col), problem.getColor() + piece)
 
 
 def main():
     parser = argparse.ArgumentParser(description='Solve and play gobblet.')
-    parser.add_argument('-o', '--opponent', type=str, default='random', choices=[
-                        'mcts', 'random', 'human'], help='sets the type of the opponent player (default: random)')
-    parser.add_argument('-s', '--strategy', type=str, default='random', choices=[
-                        'mcts', 'random'], help='sets the algorithm to generate the strategy of the agent (default: random)')
-    # parser.add_argument('-p', '--prune', action='store_true', default=False, help='use alpha-beta pruning in minimax search (has no effect on expectimax)')
+    parser.add_argument('-o', '--opponent', type=str, default='random',
+                        choices=['mcts', 'random', 'human'],
+                        help='sets the type of the opponent player ' +
+                             '(default: random)')
+    parser.add_argument('-s', '--strategy', type=str, default='random',
+                        choices=['mcts', 'random', 'human'],
+                        help='sets the algorithm to generate the strategy ' +
+                             'of the agent (default: random)')
     parser.add_argument('-t', '--trials', type=int, default=1,
-                        help='plays TRIALS games (has no effect if opponent is human, will not display games if TRIALS > 1, default: 1)')
-    parser.add_argument('-nd', '--nodisplay', action='store_true', default=True,
-                        help='do not display the game (has no effect if opponent is human)')
-    parser.add_argument('-e', '--everyturn', action='store_true', default=False,
-                        help='perform the search at every turn, rather than just from the root')
+                        help='plays TRIALS games (has no effect if opponent ' +
+                             'is human, will not display games if ' +
+                             'TRIALS > 1, default: 1)')
+    parser.add_argument('-e', '--everyturn', action='store_true',
+                        default=False,
+                        help='perform the search at every turn, rather than ' +
+                        'just from the root')
 
     args = parser.parse_args()
 
@@ -292,9 +315,6 @@ def main():
 
     agentTurn = 1
 
-    if args.trials == 1 and not args.nodisplay:
-        display = GobbletDisplay(problem)
-
     numWins = 0
     numDraws = 0
     avgGameLength = 0
@@ -302,6 +322,10 @@ def main():
         gameLength = 0
         problem.setState(initState)
         totalTurnTime = 0
+
+        if args.opponent == "human" and args.strategy != "human":
+            print("Calculating " + args.strategy + " move...")
+
         while not problem.isTerminal():
             if problem.getTurn() == agentTurn:
                 startT = time.time()
@@ -310,6 +334,8 @@ def main():
                     move = mcts(problem)[0]
                 if args.strategy == "random":
                     move = random.choice(problem.legalMoves())
+                if args.strategy == "human":
+                    move = humanTurn(problem, args.opponent)
 
                 endT = time.time()
                 totalTurnTime += endT-startT
@@ -318,16 +344,12 @@ def main():
             elif args.opponent == "random":
                 move = random.choice(problem.legalMoves())
             else:
-                move = display.getMove()
+                move = humanTurn(problem, args.strategy)
 
-            print(problem.getTurn(), move)
             problem.move(move)
 
             avgGameLength += 1
             gameLength += 1
-            if args.trials == 1 and not args.nodisplay:
-                display.update()
-                time.sleep(1)
 
         if problem.finalScore() == 0:
             whoWon = "Draw"
@@ -341,8 +363,8 @@ def main():
         if args.trials == 1:
             print(whoWon + " (" + str(gameLength) + " turns)")
             print(problem)
-            print(
-                "Total time in agent turns (ignoring opponent turns): " + str(totalTurnTime))
+            print("Total time in agent turns (ignoring opponent turns): " +
+                  str(totalTurnTime))
 
     if args.trials > 1:
         print("Agent stats:")

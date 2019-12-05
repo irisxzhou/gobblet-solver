@@ -224,6 +224,9 @@ def main():
                         help='do not display the game (has no effect if opponent is human)')
     parser.add_argument('-e', '--everyturn', action='store_true', default=False,
                         help='perform the search at every turn, rather than just from the root, has no effect on mcts')
+    parser.add_argument('-i', '--iterations', default=1000,
+                        help='number of iterations for MCTS (has no effect if' +
+                        ' agent is not MCTS), default: 1000')
 
     args = parser.parse_args()
 
@@ -279,7 +282,7 @@ def main():
                     if args.strategy == "expectimax":
                         strategy = expectiminimax(randomProblem)
                 if args.strategy == "mcts":
-                    move = mcts(problem)[0]
+                    move = mcts(problem, args.iterations)[0]
                 elif args.strategy == "random":
                     move = random.choice(problem.legalMoves())
                 else: # minimax/expectimax
@@ -295,7 +298,7 @@ def main():
             elif args.opponent == "random":
                 move = random.choice(problem.legalMoves())
             elif args.opponent == "mcts":
-                move = mcts(problem)[0]
+                move = mcts(problem, args.iterations)[0]
             else:  # human player
                 move = display.getMove()
             problem.move(move)

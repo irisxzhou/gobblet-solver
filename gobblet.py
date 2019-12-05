@@ -186,6 +186,7 @@ class Gobblet:
         self.insertPiece(action)
         self.getPieces()[int(action[1][1])] -= 1
         self.__turn *= -1
+        
 
         if self.isTerminal():
             self.__turn = 2
@@ -303,7 +304,9 @@ def main():
                         default=False,
                         help='perform the search at every turn, rather than ' +
                         'just from the root')
-
+    parser.add_argument('-i', '--iterations', type=int, default=1000,
+                        help='number of iterations in MCTS (has no effect if ' +
+                             'opponent is human, ')
     args = parser.parse_args()
 
     if args.opponent == "human":
@@ -331,7 +334,7 @@ def main():
                 startT = time.time()
 
                 if args.strategy == "mcts":
-                    move = mcts(problem)[0]
+                    move = mcts(problem, args.iterations)[0]
                 if args.strategy == "random":
                     move = random.choice(problem.legalMoves())
                 if args.strategy == "human":
@@ -340,12 +343,14 @@ def main():
                 endT = time.time()
                 totalTurnTime += endT-startT
             elif args.opponent == "mcts":
-                move = mcts(problem)[0]
+                move = mcts(problem, args.iterations)[0]
             elif args.opponent == "random":
                 move = random.choice(problem.legalMoves())
             else:
                 move = humanTurn(problem, args.strategy)
 
+            print("\nPlaced " + move[1] + " at " + str(move[0]))
+            print()
             problem.move(move)
 
             avgGameLength += 1

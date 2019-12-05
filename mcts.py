@@ -3,7 +3,7 @@ import random
 from statenode import StateNode, nodes
 
 
-def mcts(problem, iters):
+def mcts(problem, iters, useSaved):
     """
     Takes a 2-player game and uses Monte Carlo Tree Search to calculate and return
     a strategy for the game.
@@ -14,7 +14,7 @@ def mcts(problem, iters):
 
     # Settings
     # iters = 1000
-    useSaved = True
+    # useSaved = True
 
     if problem.isTerminal():
         return (0, problem.finalScore())

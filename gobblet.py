@@ -306,7 +306,10 @@ def main():
                         'just from the root')
     parser.add_argument('-i', '--iterations', type=int, default=1000,
                         help='number of iterations in MCTS (has no effect if ' +
-                             'opponent is human, ')
+                        'opponent is human, ')
+    parser.add_argument('-c', '--cached', type=bool, default=True,
+                        help='cache results of previous iterations for MCTS ' +
+                        '(has no effect if agent is not MCTS), default: True')
     args = parser.parse_args()
 
     if args.opponent == "human":
@@ -334,7 +337,7 @@ def main():
                 startT = time.time()
 
                 if args.strategy == "mcts":
-                    move = mcts(problem, args.iterations)[0]
+                    move = mcts(problem, args.iterations, args.cached)[0]
                 if args.strategy == "random":
                     move = random.choice(problem.legalMoves())
                 if args.strategy == "human":
@@ -343,7 +346,7 @@ def main():
                 endT = time.time()
                 totalTurnTime += endT-startT
             elif args.opponent == "mcts":
-                move = mcts(problem, args.iterations)[0]
+                move = mcts(problem, args.iterations, args.cached)[0]
             elif args.opponent == "random":
                 move = random.choice(problem.legalMoves())
             else:

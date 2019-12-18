@@ -33,7 +33,12 @@ class StateNode:
         ''' Get the child of the given state '''
         self.__problem.setState(self.__state)
         self.__problem.move(move)
-        return StateNode(self.__problem, self)
+
+        # If we have already seen this child, return the corresponding node
+        if self.__problem.getState() in nodes.keys:
+            return nodes[self.__problem.getState()]
+        else:
+            return StateNode(self.__problem, self)
 
     def exploreChildNode(self):
         ''' Returns a child node to explore, if there are still unexplored

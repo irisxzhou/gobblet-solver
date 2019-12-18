@@ -186,7 +186,6 @@ class Gobblet:
         self.insertPiece(action)
         self.getPieces()[int(action[1][1])] -= 1
         self.__turn *= -1
-        
 
         if self.isTerminal():
             self.__turn = 2
@@ -204,9 +203,9 @@ class Gobblet:
                 return 1
             elif row == bWins or col == bWins:
                 return -1
-        diag = [self.largestPiece((i, i))[1][0] for i in range(4)]
+        diag = [self.largestPiece((i, i))[1][0] for i in range(self.__rows)]
         antidiag = [self.largestPiece((i, self.__rows - i - 1))[1][0]
-                    for i in range(4)]
+                    for i in range(self.__rows)]
         if diag == wWins or antidiag == wWins:
             return 1
         elif diag == bWins or antidiag == bWins:
@@ -305,8 +304,8 @@ def main():
                         help='perform the search at every turn, rather than ' +
                         'just from the root')
     parser.add_argument('-i', '--iterations', type=int, default=1000,
-                        help='number of iterations in MCTS (has no effect if ' +
-                        'opponent is human, ')
+                        help='number of iterations in MCTS (has no effect ' +
+                        'if opponent is human, ')
     parser.add_argument('-c', '--cached', type=bool, default=True,
                         help='cache results of previous iterations for MCTS ' +
                         '(has no effect if agent is not MCTS), default: True')

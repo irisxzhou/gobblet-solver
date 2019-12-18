@@ -323,12 +323,12 @@ def main():
     numWins = 0
     numDraws = 0
     avgGameLength = 0
+    totalTurnTime = 0
     for t in range(args.trials):
         gameLength = 0
         problem.setState(initState)
-        totalTurnTime = 0
 
-        if args.opponent == "human" and args.strategy != "human":
+        if args.opponent == "human" and args.strategy != "human" and args.trials == 1:
             print("Calculating " + args.strategy + " move...")
 
         while not problem.isTerminal():
@@ -351,8 +351,9 @@ def main():
             else:
                 move = humanTurn(problem, args.strategy)
 
-            print("\nPlaced " + move[1] + " at " + str(move[0]))
-            print()
+            if args.trials == 1:
+                print("\nPlaced " + move[1] + " at " + str(move[0]))
+                print()
             problem.move(move)
 
             avgGameLength += 1
@@ -367,11 +368,14 @@ def main():
             whoWon = "W wins!"
             numWins += 1
 
+
         if args.trials == 1:
             print(whoWon + " (" + str(gameLength) + " turns)")
             print(problem)
             print("Total time in agent turns (ignoring opponent turns): " +
                   str(totalTurnTime))
+        else:
+            print(whoWon)
 
     if args.trials > 1:
         print("Agent stats:")
@@ -379,6 +383,7 @@ def main():
         print("Draws:  " + str(numDraws))
         print("Losses: " + str(args.trials - numWins - numDraws))
         print("Avg. Length: " + str(avgGameLength/args.trials) + " turns")
+        print("Avg. time in agent turns (ignoring opponent turns): " + str(totalTurnTime/args.trials))
 
 
 if __name__ == "__main__":

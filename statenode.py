@@ -35,7 +35,7 @@ class StateNode:
         self.__problem.move(move)
 
         # If we have already seen this child, return the corresponding node
-        if self.__problem.getState() in nodes.keys:
+        if self.__problem.getState() in nodes.keys():
             return nodes[self.__problem.getState()]
         else:
             return StateNode(self.__problem, self)
